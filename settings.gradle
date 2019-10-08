@@ -8,3 +8,10 @@
  */
 
 rootProject.name = 'JavaMicroservicesDDD'
+
+include 'Services.Common', 'Customer.App', 'Customer.Api'
+
+project(':Services.Common').projectDir = new File(settingsDir, './src/Services.Common') 
+project(':Customer.App').projectDir = new File(settingsDir, './src/Customer.App')
+project(':Customer.Api').projectDir = new File(settingsDir, './src/Customer.Api')
+
