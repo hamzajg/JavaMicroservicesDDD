@@ -1,5 +1,6 @@
 package Customer.App.src.main.java.Customer.Domain;
 
+import Customer.App.src.main.java.Customer.Events.*;
 import Services.Common.src.main.java.Services.Common.Domain.*;
 import java.util.UUID;
 
@@ -19,6 +20,13 @@ public class Customer extends AggregateRoot<UUID> {
         this.email = email;
         this.address = address;
         this.phoneNumber = phoneNumber;
+
+        try {
+            addDomainEvent(new CustomerCreated(this));
+        }
+        catch (Exception err) {
+            System.out.println(err);
+        }
     }
 
 
