@@ -17,6 +17,7 @@ public class RegisterCustomerUseCase implements IRegisterCustomerUseCase {
             throw new Exception();
         Customer customer = new Customer(new FullName(command.getFirstName(), command.getLastName()),
         new Email(command.getEmail()), new Address(command.getAddress()), new PhoneNumber(command.getPhoneNumber()));
-        pubServices.publish(new CustomerCreated(customer));
+        pubServices.publish(customer.getDomainEvents().stream().reduce((first, second) -> second)
+        .orElse(null));
     }
 }
