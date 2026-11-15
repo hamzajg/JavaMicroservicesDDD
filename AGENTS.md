@@ -64,7 +64,9 @@ src/
   Order.Api/          order Spring Boot host (:8083) — OrderConfig,
                       OrderController, RemotePorts (RestTemplate adapters
                       to :8080/:8081, URLs via customer.api.url /
-                      product.api.url), UpstreamException, DTOs
+                      product.api.url), UpstreamException, auth/
+                      (BearerAuthFilter + TokenIntrospector → Identity
+                      /identity/me via identity.api.url), DTOs
 tests live in each module's src/test (Spock specs in Customer.App)
 ```
 
@@ -110,6 +112,11 @@ NOT in a `*.App` module — don't re-create them per context.
   Upstream calls are bounded by `upstream.connect-timeout-ms` /
   `upstream.read-timeout-ms`; failures surface as 502/504 via
   `UpstreamException`, never hangs or opaque 500s.
+- **All `/orders` endpoints require a Bearer token** issued by Identity
+  (`POST /identity/login`); Order.Api introspects via
+  `GET /identity/me` (`identity.api.url`, default :8082). Missing/invalid
+  → 401, Identity down → 503. Live demos must login first; the other
+  APIs remain unauthenticated.
 - `Identity.Api` runs on **8082**; all services can run
   simultaneously (separate terminals — see bootRun landmine).
 - `Product.Api` runs on **8081** (`application.properties`) so both
