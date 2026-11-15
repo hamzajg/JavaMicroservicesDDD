@@ -26,7 +26,7 @@ public abstract class AggregateRoot<T> extends Entity<T> {
     }
 
     private void validateVersion(int version) throws InvalidVersionAggregateException {
-        if(this.version != version)
+        if(version != 0 && this.version != version)
             throw new InvalidVersionAggregateException("Invalid version specified");
     }
 
