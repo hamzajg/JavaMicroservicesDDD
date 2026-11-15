@@ -16,6 +16,7 @@ public class Customer extends AggregateRoot<UUID> {
     }
 
     public Customer(FullName fullName, Email email, Address address, PhoneNumber phoneNumber) {
+        super(UUID.randomUUID());
         this.fullName = fullName;
         this.email = email;
         this.address = address;
