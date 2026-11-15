@@ -1,7 +1,7 @@
 package Customer.App.src.main.java.Customer.App.UseCases;
 
 import Customer.App.src.main.java.Customer.App.Repositories.CustomerRepository;
-import Customer.App.src.main.java.Customer.App.Services.IPublisherServices;
+import Services.Common.src.main.java.Services.Common.Services.IPublisherServices;
 import Customer.App.src.main.java.Customer.Domain.*;
 import Customer.App.src.main.java.Customer.Events.CustomerCreated;
 

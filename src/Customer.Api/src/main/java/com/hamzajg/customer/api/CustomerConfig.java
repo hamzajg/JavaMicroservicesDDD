@@ -2,8 +2,8 @@ package com.hamzajg.customer.api;
 
 import Customer.App.src.main.java.Customer.App.Repositories.CustomerRepository;
 import Customer.App.src.main.java.Customer.App.Repositories.InMemoryCustomerRepository;
-import Customer.App.src.main.java.Customer.App.Services.IPublisherServices;
-import Customer.App.src.main.java.Customer.App.Services.InMemoryPublisherServices;
+import Services.Common.src.main.java.Services.Common.Services.IPublisherServices;
+import Services.Common.src.main.java.Services.Common.Services.InMemoryPublisherServices;
 import Customer.App.src.main.java.Customer.App.UseCases.GetCustomerUseCase;
 import Customer.App.src.main.java.Customer.App.UseCases.IRegisterCustomerUseCase;
 import Customer.App.src.main.java.Customer.App.UseCases.ListCustomersUseCase;
