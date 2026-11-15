@@ -64,7 +64,7 @@ src/
   Order.Api/          order Spring Boot host (:8083) — OrderConfig,
                       OrderController, RemotePorts (RestTemplate adapters
                       to :8080/:8081, URLs via customer.api.url /
-                      product.api.url), DTOs
+                      product.api.url), UpstreamException, DTOs
 tests live in each module's src/test (Spock specs in Customer.App)
 ```
 
@@ -107,6 +107,9 @@ NOT in a `*.App` module — don't re-create them per context.
   Gradle 5.6.1/JDK 11); javax namespace retained (Boot 2.x, not 3.x).
 - `Order.Api` runs on **8083** and needs Customer (:8080) + Product
   (:8081) reachable — `customer.api.url`/`product.api.url` properties.
+  Upstream calls are bounded by `upstream.connect-timeout-ms` /
+  `upstream.read-timeout-ms`; failures surface as 502/504 via
+  `UpstreamException`, never hangs or opaque 500s.
 - `Identity.Api` runs on **8082**; all services can run
   simultaneously (separate terminals — see bootRun landmine).
 - `Product.Api` runs on **8081** (`application.properties`) so both
