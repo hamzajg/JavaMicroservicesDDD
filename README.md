@@ -11,9 +11,10 @@ Domain-Driven Design in Java.
 | `Customer.App` / `Product.App` | Bounded-context domain + application layers (framework-free) |
 | `Customer.Api` / `Product.Api` / `Identity.Api` | Spring Boot hosts: REST controllers, DTOs, bean wiring |
 
-Three independent services run side by side: **Customer.Api :8080**,
-**Product.Api :8081**, **Identity.Api :8082** (register / login /
-bearer-token `me`).
+Four services: **Customer.Api :8080**, **Product.Api :8081**,
+**Identity.Api :8082**, **Order.Api :8083** (places orders by calling
+the customer and product services — see `customer.api.url` /
+`product.api.url` properties).
 
 ## Tech stack
 
@@ -31,6 +32,18 @@ bearer-token `me`).
 | `POST /customers` | Register a customer. Body: `firstName`, `lastName`, `email`, `address`, `phoneNumber`. `201` + customer; `400` on invalid input. |
 | `GET /customers` | List all registered customers. |
 | `GET /customers/{id}` | Get one customer; `404` if unknown. |
+
+**Order service** (`:8083`) — `specs/order-rest-api/` — the first
+cross-context feature: it calls Customer (`:8080`) and Product (`:8081`)
+over HTTP through hexagonal ports to validate and price orders
+server-side.
+
+| Endpoint | Description |
+|---|---|
+| `POST /orders` | Place an order. Body: `customerId`, `items:[{productId, quantity}]`. `201` + order (lines carry catalog sku/name/unitPrice, `total` computed); `404` unknown customer/product; `400` bad quantities. |
+| `GET /orders` | List all orders. |
+| `GET /orders/{id}` | Get one order; `404` if unknown. |
+| `POST /orders/{id}/cancel` | `PLACED`→`CANCELLED`; `409` if already cancelled; `404` unknown. |
 
 **Identity service** (`:8082`) — `specs/identity-rest-api/`
 
@@ -74,6 +87,8 @@ src/
   Product.Api/       # product REST host (:8081)
   Identity.App/      # identity domain + credentials + token store
   Identity.Api/      # identity REST host (:8082)
+  Order.App/         # order domain + CustomerDirectory/ProductCatalog ports
+  Order.Api/         # order REST host (:8083) + HTTP port adapters
 specs/               # spec-driven feature artifacts (SPEC/EXAMPLES/BACKLOG/WAVES/VALIDATION)
 gradlew, gradlew.bat
 settings.gradle
@@ -88,6 +103,7 @@ Requires **JDK 17**:
 ./gradlew :Customer.Api:bootRun          # customer API on :8080
 ./gradlew :Product.Api:bootRun           # product API on :8081 (separate terminal)
 ./gradlew :Identity.Api:bootRun          # identity API on :8082 (separate terminal)
+./gradlew :Order.Api:bootRun             # order API on :8083 (needs :8080+:8081 up)
 ```
 
 ## Tests
@@ -101,7 +117,8 @@ Spock specifications live in `Customer.App/src/test/groovy`; JUnit 5 tests
 
 ## Status
 
-Working MVP prototype: three bounded contexts — Customer (:8080),
-Product (:8081), Identity (:8082) — each a complete vertical of
-REST → use case → aggregate → repository → domain event. The classic
-e-shop trio is complete; ordering/cart is the natural next feature.
+Working MVP prototype: four bounded contexts — Customer (:8080),
+Product (:8081), Identity (:8082), Order (:8083) — each a complete
+vertical of REST → use case → aggregate → repository → domain event,
+with Order demonstrating cross-service calls via hexagonal ports.
+The classic e-shop flow (register → catalog → order) works end to end.

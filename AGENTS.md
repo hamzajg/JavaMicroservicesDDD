@@ -56,6 +56,15 @@ src/
                       in-memory impls, UseCases/Register+Login+Authenticate
   Identity.Api/       identity Spring Boot host (:8082) —
                       IdentityConfig/Controller/DTOs; register/login/me
+  Order.App/          order bounded context: Domain/Order+OrderLine+
+                      OrderStatus, Events/OrderPlaced+OrderCancelled,
+                      Ports/CustomerDirectory+ProductCatalog (hexagonal),
+                      Repositories/OrderRepository+in-memory, UseCases/
+                      Place+Cancel+Get+List
+  Order.Api/          order Spring Boot host (:8083) — OrderConfig,
+                      OrderController, RemotePorts (RestTemplate adapters
+                      to :8080/:8081, URLs via customer.api.url /
+                      product.api.url), DTOs
 tests live in each module's src/test (Spock specs in Customer.App)
 ```
 
@@ -96,7 +105,9 @@ NOT in a `*.App` module — don't re-create them per context.
 - **Default branch is `master`, not `main`.**
 - Spring Boot 2.7 / Java 17 — modernized 2026-11 (was Boot 2.1.9/Java 8,
   Gradle 5.6.1/JDK 11); javax namespace retained (Boot 2.x, not 3.x).
-- `Identity.Api` runs on **8082**; all three services can run
+- `Order.Api` runs on **8083** and needs Customer (:8080) + Product
+  (:8081) reachable — `customer.api.url`/`product.api.url` properties.
+- `Identity.Api` runs on **8082**; all services can run
   simultaneously (separate terminals — see bootRun landmine).
 - `Product.Api` runs on **8081** (`application.properties`) so both
   services run side by side; `gradlew :A:bootRun :B:bootRun` runs them
