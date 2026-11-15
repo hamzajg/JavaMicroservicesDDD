@@ -9,7 +9,7 @@
 
 rootProject.name = 'JavaMicroservicesDDD'
 
-include 'Services.Common', 'Customer.App', 'Customer.Api', 'Product.App', 'Product.Api', 'Identity.App', 'Identity.Api', 'Order.App'
+include 'Services.Common', 'Customer.App', 'Customer.Api', 'Product.App', 'Product.Api', 'Identity.App', 'Identity.Api', 'Order.App', 'Order.Api'
 
 project(':Services.Common').projectDir = new File(settingsDir, './src/Services.Common') 
 project(':Customer.App').projectDir = new File(settingsDir, './src/Customer.App')
@@ -19,4 +19,5 @@ project(':Product.Api').projectDir = new File(settingsDir, './src/Product.Api')
 project(':Identity.App').projectDir = new File(settingsDir, './src/Identity.App')
 project(':Identity.Api').projectDir = new File(settingsDir, './src/Identity.Api')
 project(':Order.App').projectDir = new File(settingsDir, './src/Order.App')
+project(':Order.Api').projectDir = new File(settingsDir, './src/Order.Api')
 
