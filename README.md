@@ -51,6 +51,12 @@ Upstream calls to Customer/Product are bounded by
 unreachable/5xx → `502`, never a hang or opaque 500
 (`specs/order-resilience/`).
 
+**Authentication** (`specs/order-auth/`): every `/orders` endpoint
+requires `Authorization: Bearer <token>` from `POST /identity/login`.
+Order.Api introspects via Identity's `GET /identity/me`
+(`identity.api.url`, default `:8082`) — missing/invalid token → `401`,
+Identity down → `503`. Customer/Product/Identity APIs remain open.
+
 **Identity service** (`:8082`) — `specs/identity-rest-api/`
 
 | Endpoint | Description |
