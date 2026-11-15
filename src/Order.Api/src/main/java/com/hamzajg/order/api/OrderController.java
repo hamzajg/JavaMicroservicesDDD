@@ -50,6 +50,8 @@ public class OrderController {
                     .body(new OrderResponse(order));
         } catch (CustomerNotFoundException | ProductNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } catch (UpstreamException e) {
+            throw new ResponseStatusException(HttpStatus.valueOf(e.getStatus()), e.getMessage());
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         } catch (Exception e) {
