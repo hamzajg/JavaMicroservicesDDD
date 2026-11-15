@@ -12,9 +12,9 @@
 
 ## Scenario coverage
 
-- Scenarios: 5 total, 4 with detected test evidence, 1 without
+- Scenarios: 5 total, 5 with detected test evidence, 0 without
 - ✓ `Registration publishes event` (@w1)
-- ✗ `Shared publisher relocation` (@w1)
+- ✓ `Shared publisher relocation` (@w1)
 - ✓ `Register product via API` (@w2)
 - ✓ `Register invalid product rejected` (@w2)
 - ✓ `Query products` (@w2)
@@ -25,7 +25,7 @@
 
 ## Gaps
 
-- 1 scenario(s) lack detected test evidence — verify manually or add checks
+- none — spec is fully traced
 
 Note: 'no evidence' means neither the scenario name nor a
 token match was found in test files — verify by hand before
