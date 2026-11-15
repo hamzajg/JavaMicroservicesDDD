@@ -130,4 +130,26 @@ public class OrderControllerTest {
         mockMvc.perform(post("/orders/" + id + "/cancel"))
                 .andExpect(status().isConflict());
     }
+
+    @Test
+    void upstreamFailureReturnsClean5xx() throws Exception {
+        // covers scenario: Upstream server error returns a clean error
+        // covers scenario: Upstream connection failure returns a clean error
+        when(customerDirectory.customerExists(any(UUID.class)))
+                .thenThrow(new UpstreamException("upstream unavailable", 502, null));
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(placePayload(CUSTOMER,
+                                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
+                .andExpect(status().isBadGateway())
+                .andExpect(content().string(not(containsString("Exception"))));
+
+        when(customerDirectory.customerExists(any(UUID.class)))
+                .thenThrow(new UpstreamException("upstream timed out", 504, null));
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(placePayload(CUSTOMER,
+                                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
+                .andExpect(status().isGatewayTimeout());
+    }
 }

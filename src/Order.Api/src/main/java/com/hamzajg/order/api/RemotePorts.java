@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -16,13 +17,15 @@ import java.util.UUID;
 @Component
 public class RemotePorts {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String customerBaseUrl;
     private final String productBaseUrl;
 
-    public RemotePorts(@Value("${customer.api.url:http://localhost:8080}") String customerBaseUrl,
+    public RemotePorts(RestTemplate restTemplate,
+                       @Value("${customer.api.url:http://localhost:8080}") String customerBaseUrl,
                        @Value("${product.api.url:http://localhost:8081}") String productBaseUrl) {
+        this.restTemplate = restTemplate;
         this.customerBaseUrl = customerBaseUrl;
         this.productBaseUrl = productBaseUrl;
     }
@@ -36,6 +39,9 @@ public class RemotePorts {
             }
             catch (HttpClientErrorException.NotFound e) {
                 return false;
+            }
+            catch (RestClientException e) {
+                throw UpstreamException.from(e);
             }
         };
     }
@@ -54,8 +60,11 @@ public class RemotePorts {
             catch (HttpClientErrorException.NotFound e) {
                 return Optional.empty();
             }
+            catch (RestClientException e) {
+                throw UpstreamException.from(e);
+            }
             catch (Exception e) {
-                throw new IllegalStateException("product catalog unavailable", e);
+                throw UpstreamException.badGateway("product catalog returned an unreadable response", e);
             }
         };
     }
