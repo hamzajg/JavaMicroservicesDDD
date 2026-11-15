@@ -36,18 +36,29 @@ src/
                       Domain/  Customer, FullName, Email, Address, PhoneNumber
                       Events/  CustomerCreated
                       UseCases/ IRegisterCustomerUseCase, RegisterCustomer,
-                               RegisterCustomerUseCase
+                               RegisterCustomerUseCase, GetCustomerUseCase,
+                               ListCustomersUseCase
+                      Repositories/ CustomerRepository + InMemory impl
                       Services/ IPublisherServices + InMemory impl
-  Customer.Api/       Spring Boot 2.1.9 shell — Application.java ONLY,
-                      NO controllers yet (web + webflux deps present)
+  Customer.Api/       Spring Boot host — Application.java +
+                      CustomerConfig (@Bean wiring), CustomerController,
+                      CustomerRequest/CustomerResponse DTOs
 tests live in each module's src/test (Spock specs in Customer.App)
 ```
 
 ### API contract
 
-**None yet.** `Customer.Api` has no `@RestController` — grep finds none.
-The API surface is unimplemented; the domain/use-case layer is the real
-content. Don't document endpoints that don't exist.
+`CustomerController` (`com.hamzajg.customer.api`, `@RequestMapping("/customers")`):
+
+| Endpoint | Result |
+|---|---|
+| `POST /customers` | 201 + `CustomerResponse`; 400 on `IllegalArgumentException` from use-case validation |
+| `GET /customers` | 200 + list of `CustomerResponse` |
+| `GET /customers/{id}` | 200 + `CustomerResponse`; 404 unknown id |
+
+Persistence/events are in-memory (`InMemoryCustomerRepository`,
+`InMemoryPublisherServices`) wired in `CustomerConfig` — `Customer.App`
+itself stays Spring-free.
 
 ## Conventions
 
@@ -66,8 +77,12 @@ content. Don't document endpoints that don't exist.
 - **Default branch is `master`, not `main`.**
 - Spring Boot 2.7 / Java 17 — modernized 2026-11 (was Boot 2.1.9/Java 8,
   Gradle 5.6.1/JDK 11); javax namespace retained (Boot 2.x, not 3.x).
-- `Customer.Api` is a **shell with zero endpoints** — README's "REST API"
-  framing is aspirational; the implemented part is the domain/use cases.
+- `Customer.Api` now has a real REST surface (`/customers`) — the
+  "shell with zero endpoints" note is obsolete. Persistence is still
+  in-memory by design.
+- `Customer.Api/build.gradle` needs `test { useJUnitPlatform() }` —
+  without it JUnit 5 tests are **silently skipped** (this hid a real
+  `PhoneNumber` ctor bug until the flag was added).
 - `settings.gradle` maps `:Services.Common` etc. to `src/...` dirs —
   module names ≠ directory names.
 - Package roots are inconsistent (`com.hamzajg.customer.api` vs
