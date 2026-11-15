@@ -1,0 +1,62 @@
+package com.hamzajg.order.api;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import Order.App.src.main.java.Order.App.Ports.CustomerDirectory;
+import Order.App.src.main.java.Order.App.Ports.ProductCatalog;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+import java.math.BigDecimal;
+import java.util.Optional;
+import java.util.UUID;
+
+@Component
+public class RemotePorts {
+
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String customerBaseUrl;
+    private final String productBaseUrl;
+
+    public RemotePorts(@Value("${customer.api.url:http://localhost:8080}") String customerBaseUrl,
+                       @Value("${product.api.url:http://localhost:8081}") String productBaseUrl) {
+        this.customerBaseUrl = customerBaseUrl;
+        this.productBaseUrl = productBaseUrl;
+    }
+
+    public CustomerDirectory customerDirectory() {
+        return customerId -> {
+            try {
+                restTemplate.exchange(customerBaseUrl + "/customers/" + customerId,
+                        HttpMethod.GET, null, String.class);
+                return true;
+            }
+            catch (HttpClientErrorException.NotFound e) {
+                return false;
+            }
+        };
+    }
+
+    public ProductCatalog productCatalog() {
+        return productId -> {
+            try {
+                String body = restTemplate.getForObject(productBaseUrl + "/products/" + productId, String.class);
+                JsonNode node = objectMapper.readTree(body);
+                return Optional.of(new ProductCatalog.ProductSnapshot(
+                        UUID.fromString(node.get("id").asText()),
+                        node.get("sku").asText(),
+                        node.get("name").asText(),
+                        new BigDecimal(node.get("price").asText())));
+            }
+            catch (HttpClientErrorException.NotFound e) {
+                return Optional.empty();
+            }
+            catch (Exception e) {
+                throw new IllegalStateException("product catalog unavailable", e);
+            }
+        };
+    }
+}
