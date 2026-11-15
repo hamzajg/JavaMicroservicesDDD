@@ -45,6 +45,12 @@ server-side.
 | `GET /orders/{id}` | Get one order; `404` if unknown. |
 | `POST /orders/{id}/cancel` | `PLACED`→`CANCELLED`; `409` if already cancelled; `404` unknown. |
 
+Upstream calls to Customer/Product are bounded by
+`upstream.connect-timeout-ms` (default 2000) and
+`upstream.read-timeout-ms` (default 5000). A stalled upstream → `504`,
+unreachable/5xx → `502`, never a hang or opaque 500
+(`specs/order-resilience/`).
+
 **Identity service** (`:8082`) — `specs/identity-rest-api/`
 
 | Endpoint | Description |
