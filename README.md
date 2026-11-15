@@ -9,10 +9,11 @@ Domain-Driven Design in Java.
 |---|---|
 | `Services.Common` | Shared DDD kernel: `Entity`, `AggregateRoot`, commands, domain events, publisher ports |
 | `Customer.App` / `Product.App` | Bounded-context domain + application layers (framework-free) |
-| `Customer.Api` / `Product.Api` | Spring Boot hosts: REST controllers, DTOs, bean wiring |
+| `Customer.Api` / `Product.Api` / `Identity.Api` | Spring Boot hosts: REST controllers, DTOs, bean wiring |
 
-Two independent services run side by side: **Customer.Api on :8080**,
-**Product.Api on :8081**.
+Three independent services run side by side: **Customer.Api :8080**,
+**Product.Api :8081**, **Identity.Api :8082** (register / login /
+bearer-token `me`).
 
 ## Tech stack
 
@@ -30,6 +31,14 @@ Two independent services run side by side: **Customer.Api on :8080**,
 | `POST /customers` | Register a customer. Body: `firstName`, `lastName`, `email`, `address`, `phoneNumber`. `201` + customer; `400` on invalid input. |
 | `GET /customers` | List all registered customers. |
 | `GET /customers/{id}` | Get one customer; `404` if unknown. |
+
+**Identity service** (`:8082`) — `specs/identity-rest-api/`
+
+| Endpoint | Description |
+|---|---|
+| `POST /identity/register` | Register a user (`email`, `displayName`, `password` ≥ 8). `201` + user; `400` invalid; `409` duplicate email. Password stored as salted SHA-256 — **kata-grade crypto, not production** (use BCrypt/Argon2 in real systems). |
+| `POST /identity/login` | `email` + `password` → `200` + opaque `token`; `401` on bad credentials. |
+| `GET /identity/me` | `Authorization: Bearer <token>` → user; `401` missing/invalid token. |
 
 **Product service** (`:8081`) — `specs/product-rest-api/`
 
@@ -63,6 +72,8 @@ src/
   Customer.Api/      # customer REST host (:8080)
   Product.App/       # product domain + use cases + in-memory repo
   Product.Api/       # product REST host (:8081)
+  Identity.App/      # identity domain + credentials + token store
+  Identity.Api/      # identity REST host (:8082)
 specs/               # spec-driven feature artifacts (SPEC/EXAMPLES/BACKLOG/WAVES/VALIDATION)
 gradlew, gradlew.bat
 settings.gradle
@@ -76,6 +87,7 @@ Requires **JDK 17**:
 ./gradlew build                          # compile + test all modules
 ./gradlew :Customer.Api:bootRun          # customer API on :8080
 ./gradlew :Product.Api:bootRun           # product API on :8081 (separate terminal)
+./gradlew :Identity.Api:bootRun          # identity API on :8082 (separate terminal)
 ```
 
 ## Tests
@@ -89,7 +101,7 @@ Spock specifications live in `Customer.App/src/test/groovy`; JUnit 5 tests
 
 ## Status
 
-Working MVP prototype: two bounded contexts — Customer (:8080) and
-Product (:8081) — each a complete vertical of REST → use case →
-aggregate → repository → domain event. The `Identity` slice of a
-typical e-shop is not present here.
+Working MVP prototype: three bounded contexts — Customer (:8080),
+Product (:8081), Identity (:8082) — each a complete vertical of
+REST → use case → aggregate → repository → domain event. The classic
+e-shop trio is complete; ordering/cart is the natural next feature.
