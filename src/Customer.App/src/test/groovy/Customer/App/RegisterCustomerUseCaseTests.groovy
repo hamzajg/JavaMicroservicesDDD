@@ -20,6 +20,12 @@ public class RegisterCustomerUseCaseTests extends Specification {
         sutRCUseCase = new RegisterCustomerUseCase(pubServices, customerRepository)
     }
 
+    def "Publisher services resolve from the shared kernel"() {
+        expect:
+        // covers scenario: Shared publisher relocation
+        pubServices.class.name.startsWith('Services.Common.src.main.java.Services.Common.Services')
+    }
+
     def "Should throw exception when handle null command"() {
         when:
         sutRCUseCase.handle(null)

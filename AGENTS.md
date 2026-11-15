@@ -31,7 +31,8 @@ src/
   Services.Common/    shared DDD kernel (Java):
                       Commands/ICommand + ICommandHandler,
                       Domain/Entity + AggregateRoot,
-                      Domain/Events/IEvent + DomainEvent + IEventHandler
+                      Domain/Events/IEvent + DomainEvent + IEventHandler,
+                      Services/IPublisherServices + InMemory impl
   Customer.App/       customer domain + application (Java + Groovy tests):
                       Domain/  Customer, FullName, Email, Address, PhoneNumber
                       Events/  CustomerCreated
@@ -39,10 +40,15 @@ src/
                                RegisterCustomerUseCase, GetCustomerUseCase,
                                ListCustomersUseCase
                       Repositories/ CustomerRepository + InMemory impl
-                      Services/ IPublisherServices + InMemory impl
-  Customer.Api/       Spring Boot host — Application.java +
+  Customer.Api/       customer Spring Boot host (:8080) — Application.java,
                       CustomerConfig (@Bean wiring), CustomerController,
                       CustomerRequest/CustomerResponse DTOs
+  Product.App/        product bounded context (mirrors Customer.App):
+                      Domain/Product, Events/ProductCreated,
+                      UseCases/ Register/Get/List + DuplicateSkuException,
+                      Repositories/ ProductRepository + InMemory impl
+  Product.Api/        product Spring Boot host (:8081) — same shape as
+                      Customer.Api (ProductConfig/Controller/DTOs)
 tests live in each module's src/test (Spock specs in Customer.App)
 ```
 
@@ -56,9 +62,15 @@ tests live in each module's src/test (Spock specs in Customer.App)
 | `GET /customers` | 200 + list of `CustomerResponse` |
 | `GET /customers/{id}` | 200 + `CustomerResponse`; 404 unknown id |
 
+**Product service** (`ProductController`, `:8081`, `/products`) — same
+shape: `POST` → 201 / 400 / **409** (`DuplicateSkuException`),
+`GET` list, `GET /{id}` → 404.
+
 Persistence/events are in-memory (`InMemoryCustomerRepository`,
-`InMemoryPublisherServices`) wired in `CustomerConfig` — `Customer.App`
-itself stays Spring-free.
+`InMemoryProductRepository`, `InMemoryPublisherServices` in
+`Services.Common`) wired per-service via `*Config` `@Bean`s — `*.App`
+modules stay Spring-free. Publisher ports live in `Services.Common`,
+NOT in a `*.App` module — don't re-create them per context.
 
 ## Conventions
 
@@ -77,12 +89,14 @@ itself stays Spring-free.
 - **Default branch is `master`, not `main`.**
 - Spring Boot 2.7 / Java 17 — modernized 2026-11 (was Boot 2.1.9/Java 8,
   Gradle 5.6.1/JDK 11); javax namespace retained (Boot 2.x, not 3.x).
-- `Customer.Api` now has a real REST surface (`/customers`) — the
-  "shell with zero endpoints" note is obsolete. Persistence is still
-  in-memory by design.
-- `Customer.Api/build.gradle` needs `test { useJUnitPlatform() }` —
+- `Product.Api` runs on **8081** (`application.properties`) so both
+  services run side by side; `gradlew :A:bootRun :B:bootRun` runs them
+  SEQUENTIALLY — use two terminals/processes for a live pair.
+- Each `*.Api` module must declare `test { useJUnitPlatform() }` —
   without it JUnit 5 tests are **silently skipped** (this hid a real
   `PhoneNumber` ctor bug until the flag was added).
+- `.gitignore` ignores `build/` at any depth — module build output must
+  never be committed (a new module's `build/` slipped into PR #11 once).
 - `settings.gradle` maps `:Services.Common` etc. to `src/...` dirs —
   module names ≠ directory names.
 - Package roots are inconsistent (`com.hamzajg.customer.api` vs
