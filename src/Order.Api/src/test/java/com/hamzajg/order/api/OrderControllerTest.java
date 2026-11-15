@@ -1,7 +1,10 @@
 package com.hamzajg.order.api;
 
+import com.hamzajg.order.api.auth.IntrospectionResult;
+import com.hamzajg.order.api.auth.TokenIntrospector;
 import Order.App.src.main.java.Order.App.Ports.CustomerDirectory;
 import Order.App.src.main.java.Order.App.Ports.ProductCatalog;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,6 +40,16 @@ public class OrderControllerTest {
     @MockBean
     private ProductCatalog productCatalog;
 
+    @MockBean
+    private TokenIntrospector tokenIntrospector;
+
+    private static final String AUTH = "Bearer test-token";
+
+    @BeforeEach
+    void validTokenByDefault() {
+        when(tokenIntrospector.introspect(any())).thenReturn(IntrospectionResult.VALID);
+    }
+
     private static final UUID CUSTOMER = UUID.randomUUID();
     private static final UUID PRODUCT_A = UUID.randomUUID();
     private static final UUID PRODUCT_B = UUID.randomUUID();
@@ -60,6 +73,7 @@ public class OrderControllerTest {
         String items = "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":2},"
                 + "{\"productId\":\"" + PRODUCT_B + "\",\"quantity\":4}]";
         MvcResult created = mockMvc.perform(post("/orders")
+                        .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(placePayload(CUSTOMER, items)))
                 .andExpect(status().isCreated())
@@ -71,7 +85,7 @@ public class OrderControllerTest {
                 .andReturn();
 
         JsonNode id = objectMapper.readTree(created.getResponse().getContentAsString()).get("id");
-        mockMvc.perform(get("/orders/" + id.asText()))
+        mockMvc.perform(get("/orders/" + id.asText()).header("Authorization", AUTH))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lines", hasSize(2)));
     }
@@ -81,6 +95,7 @@ public class OrderControllerTest {
         // covers scenario: Place order rejected cleanly
         when(customerDirectory.customerExists(any(UUID.class))).thenReturn(false);
         mockMvc.perform(post("/orders")
+                        .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(placePayload(UUID.randomUUID(),
                                 "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
@@ -89,12 +104,14 @@ public class OrderControllerTest {
         when(customerDirectory.customerExists(CUSTOMER)).thenReturn(true);
         when(productCatalog.findById(any(UUID.class))).thenReturn(Optional.empty());
         mockMvc.perform(post("/orders")
+                        .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(placePayload(CUSTOMER,
                                 "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(post("/orders")
+                        .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(placePayload(CUSTOMER,
                                 "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":0}]")))
@@ -107,27 +124,29 @@ public class OrderControllerTest {
         // covers scenario: Cancel order
         stubHappyPath();
         MvcResult first = mockMvc.perform(post("/orders")
+                        .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(placePayload(CUSTOMER,
                                 "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
                 .andExpect(status().isCreated()).andReturn();
         mockMvc.perform(post("/orders")
+                        .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(placePayload(CUSTOMER,
                                 "[{\"productId\":\"" + PRODUCT_B + "\",\"quantity\":2}]")))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(get("/orders"))
+        mockMvc.perform(get("/orders").header("Authorization", AUTH))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(2))));
-        mockMvc.perform(get("/orders/" + UUID.randomUUID()))
+        mockMvc.perform(get("/orders/" + UUID.randomUUID()).header("Authorization", AUTH))
                 .andExpect(status().isNotFound());
 
         String id = objectMapper.readTree(first.getResponse().getContentAsString()).get("id").asText();
-        mockMvc.perform(post("/orders/" + id + "/cancel"))
+        mockMvc.perform(post("/orders/" + id + "/cancel").header("Authorization", AUTH))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status", is("CANCELLED")));
-        mockMvc.perform(post("/orders/" + id + "/cancel"))
+        mockMvc.perform(post("/orders/" + id + "/cancel").header("Authorization", AUTH))
                 .andExpect(status().isConflict());
     }
 
@@ -138,6 +157,7 @@ public class OrderControllerTest {
         when(customerDirectory.customerExists(any(UUID.class)))
                 .thenThrow(new UpstreamException("upstream unavailable", 502, null));
         mockMvc.perform(post("/orders")
+                        .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(placePayload(CUSTOMER,
                                 "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
@@ -147,9 +167,48 @@ public class OrderControllerTest {
         when(customerDirectory.customerExists(any(UUID.class)))
                 .thenThrow(new UpstreamException("upstream timed out", 504, null));
         mockMvc.perform(post("/orders")
+                        .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(placePayload(CUSTOMER,
                                 "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
                 .andExpect(status().isGatewayTimeout());
+    }
+
+    @Test
+    void authEnforcement() throws Exception {
+        String body = placePayload(CUSTOMER,
+                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]");
+
+        // covers scenario: Missing token is rejected
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isUnauthorized());
+        mockMvc.perform(get("/orders"))
+                .andExpect(status().isUnauthorized());
+
+        // covers scenario: Invalid token is rejected
+        when(tokenIntrospector.introspect("bad-token")).thenReturn(IntrospectionResult.INVALID);
+        mockMvc.perform(post("/orders")
+                        .header("Authorization", "Bearer bad-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isUnauthorized());
+
+        // covers scenario: Identity outage fails closed
+        when(tokenIntrospector.introspect("any-token")).thenReturn(IntrospectionResult.UNAVAILABLE);
+        mockMvc.perform(post("/orders")
+                        .header("Authorization", "Bearer any-token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isServiceUnavailable());
+
+        // covers scenario: Valid token reaches order logic
+        stubHappyPath();
+        mockMvc.perform(post("/orders")
+                        .header("Authorization", AUTH)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
     }
 }

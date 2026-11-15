@@ -12,7 +12,10 @@ import Order.App.src.main.java.Order.App.UseCases.ListOrdersUseCase;
 import Order.App.src.main.java.Order.App.UseCases.PlaceOrderUseCase;
 import Services.Common.src.main.java.Services.Common.Services.IPublisherServices;
 import Services.Common.src.main.java.Services.Common.Services.InMemoryPublisherServices;
+import com.hamzajg.order.api.auth.BearerAuthFilter;
+import com.hamzajg.order.api.auth.TokenIntrospector;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -29,6 +32,14 @@ public class OrderConfig {
         factory.setConnectTimeout(connectTimeoutMs);
         factory.setReadTimeout(readTimeoutMs);
         return new RestTemplate(factory);
+    }
+
+    @Bean
+    public FilterRegistrationBean<BearerAuthFilter> bearerAuthFilter(TokenIntrospector tokenIntrospector) {
+        FilterRegistrationBean<BearerAuthFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(new BearerAuthFilter(tokenIntrospector));
+        registration.addUrlPatterns("/orders/*");
+        return registration;
     }
 
     @Bean
