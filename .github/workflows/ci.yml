@@ -20,8 +20,8 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          # The Gradle 5.6.1 wrapper does not support Java 17.
-          java-version: "11"
+          # Gradle 7.6.4 runs on Java 17.
+          java-version: "17"
 
       - uses: gradle/actions/setup-gradle@v4
 
