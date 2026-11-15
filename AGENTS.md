@@ -7,8 +7,8 @@ Guidance for AI agents (and humans) working in this repository.
 A small multi-module Spring Boot project exploring microservices with
 Domain-Driven Design in Java. **Learning/reference project** — currently
 only the Customer slice exists; Product/Identity are absent by design.
-Stack: Java 8 (Customer.Api) / Java library modules, Spring Boot 2.1.9
-(Web + WebFlux deps), Spock + JUnit 4 tests, Gradle 5.6.1 wrapper.
+Stack: Java 17, Spring Boot 2.7.18
+(Web + WebFlux deps), Spock 2 + JUnit 5 tests, Gradle 7.6.4 wrapper.
 
 ## Commands
 
@@ -16,12 +16,12 @@ Verified 2026-11-13 against CI (`.github/workflows/ci.yml`) and README.
 
 | Task | Command |
 |---|---|
-| Build + test | `sh gradlew build --no-daemon` (CI: JDK 11) |
+| Build + test | `sh gradlew build --no-daemon` (CI: JDK 17) |
 | Tests only | `sh gradlew test` |
 | Run API | `sh gradlew :Customer.Api:bootRun` (Spring default :8080) |
 
-Requires: **JDK 8 or 11** — Gradle 5.6.1 does not support Java 17; CI pins
-`java-version: "11"`. Modules map to dirs via `settings.gradle`'s
+Requires: **JDK 17** (CI pins `java-version: "17"`; Gradle 7.6.4
+runs on it). Modules map to dirs via `settings.gradle`'s
 `projectDir` trick (names ≠ paths).
 
 ## Architecture
@@ -55,8 +55,8 @@ content. Don't document endpoints that don't exist.
   `*.App` = domain + use cases (framework-light), `*.Api` = Spring host.
 - Use-case naming: `IRegisterCustomerUseCase` interface +
   `RegisterCustomerUseCase` impl + `RegisterCustomer` command — match it.
-- Spock specifications (`.groovy` under `src/test/groovy`) for App tests;
-  JUnit for Api tests.
+- Spock 2 specifications (`.groovy` under `src/test/groovy`) for App tests
+  (JUnit platform); JUnit 5 (`jupiter`) for Api tests.
 - In-memory publisher (`InMemoryPublisherServices`) is the event bus
   stand-in — no real messaging.
 - KISS: this is a learning repo; the layering is the lesson.
@@ -64,8 +64,8 @@ content. Don't document endpoints that don't exist.
 ## Landmines
 
 - **Default branch is `master`, not `main`.**
-- **Gradle 5.6.1 ⇒ JDK ≤11** — Java 17 breaks the build; CI pins 11.
-- Spring Boot 2.1.9 / Java 8 — EOL stack, accepted for the course context.
+- Spring Boot 2.7 / Java 17 — modernized 2026-11 (was Boot 2.1.9/Java 8,
+  Gradle 5.6.1/JDK 11); javax namespace retained (Boot 2.x, not 3.x).
 - `Customer.Api` is a **shell with zero endpoints** — README's "REST API"
   framing is aspirational; the implemented part is the domain/use cases.
 - `settings.gradle` maps `:Services.Common` etc. to `src/...` dirs —
