@@ -15,6 +15,10 @@ public abstract class AggregateRoot<T> extends Entity<T> {
         
     }
 
+    protected AggregateRoot(T id) {
+        super(id);
+    }
+
     public void addDomainEvent(DomainEvent newEvent) throws InvalidVersionAggregateException {
         this.validateVersion(newEvent.getVersion());
         newEvent.setVersion(++version);
