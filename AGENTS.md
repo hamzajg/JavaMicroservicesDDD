@@ -49,6 +49,13 @@ src/
                       Repositories/ ProductRepository + InMemory impl
   Product.Api/        product Spring Boot host (:8081) — same shape as
                       Customer.Api (ProductConfig/Controller/DTOs)
+  Identity.App/       identity bounded context: Domain/User (email,
+                      displayName, salted SHA-256 hash+salt), Events/
+                      UserRegistered, Services/PasswordHasher + AuthToken,
+                      Repositories/UserRepository + AuthTokenStore +
+                      in-memory impls, UseCases/Register+Login+Authenticate
+  Identity.Api/       identity Spring Boot host (:8082) —
+                      IdentityConfig/Controller/DTOs; register/login/me
 tests live in each module's src/test (Spock specs in Customer.App)
 ```
 
@@ -66,8 +73,8 @@ tests live in each module's src/test (Spock specs in Customer.App)
 shape: `POST` → 201 / 400 / **409** (`DuplicateSkuException`),
 `GET` list, `GET /{id}` → 404.
 
-Persistence/events are in-memory (`InMemoryCustomerRepository`,
-`InMemoryProductRepository`, `InMemoryPublisherServices` in
+Persistence/events/tokens are in-memory (`InMemory*Repository`,
+`InMemoryAuthTokenStore`, `InMemoryPublisherServices` in
 `Services.Common`) wired per-service via `*Config` `@Bean`s — `*.App`
 modules stay Spring-free. Publisher ports live in `Services.Common`,
 NOT in a `*.App` module — don't re-create them per context.
@@ -89,6 +96,8 @@ NOT in a `*.App` module — don't re-create them per context.
 - **Default branch is `master`, not `main`.**
 - Spring Boot 2.7 / Java 17 — modernized 2026-11 (was Boot 2.1.9/Java 8,
   Gradle 5.6.1/JDK 11); javax namespace retained (Boot 2.x, not 3.x).
+- `Identity.Api` runs on **8082**; all three services can run
+  simultaneously (separate terminals — see bootRun landmine).
 - `Product.Api` runs on **8081** (`application.properties`) so both
   services run side by side; `gradlew :A:bootRun :B:bootRun` runs them
   SEQUENTIALLY — use two terminals/processes for a live pair.
