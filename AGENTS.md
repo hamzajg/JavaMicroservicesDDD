@@ -93,7 +93,7 @@ itself stays Spring-free.
 
 - Branch from `master`; name branches `feat/*`, `fix/*`, `chore/*`, `docs/*`.
 - Docs-only changes still go through a PR; never commit to `master` directly.
-- Verify before claiming: `sh gradlew build --no-daemon` on JDK ≤11 and
+- Verify before claiming: `sh gradlew build --no-daemon` on JDK 17 and
   report the real result.
 - Keep changes minimal and consistent with surrounding code. No drive-by
   refactors.
