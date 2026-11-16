@@ -10,6 +10,7 @@ import Order.App.src.main.java.Order.App.UseCases.ICancelOrderUseCase;
 import Order.App.src.main.java.Order.App.UseCases.IPlaceOrderUseCase;
 import Order.App.src.main.java.Order.App.UseCases.ListOrdersUseCase;
 import Order.App.src.main.java.Order.App.UseCases.PlaceOrderUseCase;
+import Order.App.src.main.java.Order.App.UseCases.ResolveCustomerUseCase;
 import Services.Common.src.main.java.Services.Common.Services.IPublisherServices;
 import Services.Common.src.main.java.Services.Common.Services.InMemoryPublisherServices;
 import com.hamzajg.order.api.auth.BearerAuthFilter;
@@ -84,5 +85,10 @@ public class OrderConfig {
     @Bean
     public ListOrdersUseCase listOrdersUseCase(OrderRepository orderRepository) {
         return new ListOrdersUseCase(orderRepository);
+    }
+
+    @Bean
+    public ResolveCustomerUseCase resolveCustomerUseCase(CustomerDirectory customerDirectory) {
+        return new ResolveCustomerUseCase(customerDirectory);
     }
 }

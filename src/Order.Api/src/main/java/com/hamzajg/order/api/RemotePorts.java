@@ -31,17 +31,40 @@ public class RemotePorts {
     }
 
     public CustomerDirectory customerDirectory() {
-        return customerId -> {
-            try {
-                restTemplate.exchange(customerBaseUrl + "/customers/" + customerId,
-                        HttpMethod.GET, null, String.class);
-                return true;
+        return new CustomerDirectory() {
+            @Override
+            public boolean customerExists(UUID customerId) {
+                try {
+                    restTemplate.exchange(customerBaseUrl + "/customers/" + customerId,
+                            HttpMethod.GET, null, String.class);
+                    return true;
+                }
+                catch (HttpClientErrorException.NotFound e) {
+                    return false;
+                }
+                catch (RestClientException e) {
+                    throw UpstreamException.from(e);
+                }
             }
-            catch (HttpClientErrorException.NotFound e) {
-                return false;
-            }
-            catch (RestClientException e) {
-                throw UpstreamException.from(e);
+
+            @Override
+            public Optional<UUID> findByEmail(String email) {
+                try {
+                    String body = restTemplate.getForObject(
+                            customerBaseUrl + "/customers/by-email?email={email}",
+                            String.class, email == null ? "" : email);
+                    JsonNode node = objectMapper.readTree(body);
+                    return Optional.of(UUID.fromString(node.get("id").asText()));
+                }
+                catch (HttpClientErrorException.NotFound e) {
+                    return Optional.empty();
+                }
+                catch (RestClientException e) {
+                    throw UpstreamException.from(e);
+                }
+                catch (Exception e) {
+                    throw UpstreamException.badGateway("customer directory returned an unreadable response", e);
+                }
             }
         };
     }

@@ -67,4 +67,25 @@ public class CustomerControllerTest {
         mockMvc.perform(get("/customers/" + java.util.UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void findCustomerByEmailBehaves() throws Exception {
+        // covers scenario: A caller is resolved to their customer by email
+        String email = "lookup-" + java.util.UUID.randomUUID() + "@example.com";
+        String body = "{\"firstName\":\"Ada\",\"lastName\":\"Lovelace\",\"email\":\"" + email
+                + "\",\"address\":\"1 Analytical Engine Way\",\"phoneNumber\":\"555-0001\"}";
+        MvcResult created = mockMvc.perform(post("/customers")
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isCreated()).andReturn();
+        String id = objectMapper.readTree(created.getResponse().getContentAsString()).get("id").asText();
+
+        mockMvc.perform(get("/customers/by-email").param("email", email))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(id)))
+                .andExpect(jsonPath("$.email", is(email)));
+
+        // covers scenario: An unknown caller email resolves to no customer
+        mockMvc.perform(get("/customers/by-email").param("email", "ghost@example.com"))
+                .andExpect(status().isNotFound());
+    }
 }

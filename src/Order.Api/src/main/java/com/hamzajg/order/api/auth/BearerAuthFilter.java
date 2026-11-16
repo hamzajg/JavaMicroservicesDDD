@@ -10,6 +10,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 public class BearerAuthFilter extends OncePerRequestFilter {
 
+    /** Request attribute holding the authenticated caller's email (set when VALID). */
+    public static final String CALLER_EMAIL_ATTR = "com.hamzajg.order.callerEmail";
+
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final TokenIntrospector tokenIntrospector;
@@ -32,9 +35,10 @@ public class BearerAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        IntrospectionResult result = tokenIntrospector.introspect(token);
-        switch (result) {
+        Introspection introspection = tokenIntrospector.introspect(token);
+        switch (introspection.getResult()) {
             case VALID:
+                request.setAttribute(CALLER_EMAIL_ATTR, introspection.getEmail());
                 chain.doFilter(request, response);
                 break;
             case INVALID:

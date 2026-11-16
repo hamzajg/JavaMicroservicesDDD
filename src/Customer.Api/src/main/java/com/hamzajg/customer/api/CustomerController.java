@@ -1,5 +1,6 @@
 package com.hamzajg.customer.api;
 
+import Customer.App.src.main.java.Customer.App.UseCases.FindCustomerByEmailUseCase;
 import Customer.App.src.main.java.Customer.App.UseCases.GetCustomerUseCase;
 import Customer.App.src.main.java.Customer.App.UseCases.IRegisterCustomerUseCase;
 import Customer.App.src.main.java.Customer.App.UseCases.ListCustomersUseCase;
@@ -21,13 +22,16 @@ public class CustomerController {
     private final IRegisterCustomerUseCase registerCustomerUseCase;
     private final GetCustomerUseCase getCustomerUseCase;
     private final ListCustomersUseCase listCustomersUseCase;
+    private final FindCustomerByEmailUseCase findCustomerByEmailUseCase;
 
     public CustomerController(IRegisterCustomerUseCase registerCustomerUseCase,
                               GetCustomerUseCase getCustomerUseCase,
-                              ListCustomersUseCase listCustomersUseCase) {
+                              ListCustomersUseCase listCustomersUseCase,
+                              FindCustomerByEmailUseCase findCustomerByEmailUseCase) {
         this.registerCustomerUseCase = registerCustomerUseCase;
         this.getCustomerUseCase = getCustomerUseCase;
         this.listCustomersUseCase = listCustomersUseCase;
+        this.findCustomerByEmailUseCase = findCustomerByEmailUseCase;
     }
 
     @PostMapping
@@ -50,6 +54,13 @@ public class CustomerController {
         return listCustomersUseCase.list().stream()
                 .map(CustomerResponse::new)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/by-email")
+    public CustomerResponse getByEmail(@RequestParam String email) {
+        return findCustomerByEmailUseCase.find(email)
+                .map(CustomerResponse::new)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "customer not found"));
     }
 
     @GetMapping("/{id}")
