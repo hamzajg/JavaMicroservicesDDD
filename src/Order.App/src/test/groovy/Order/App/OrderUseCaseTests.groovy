@@ -121,7 +121,9 @@ public class OrderUseCaseTests extends Specification {
         def second = placeUseCase.place(new PlaceOrder(customerId, [new PlaceOrder.OrderItem(productB, 2)]))
 
         expect:
-        listUseCase.list().size() == 2
+        // covers scenario: Listing returns only the caller's orders
+        listUseCase.listFor(customerId).size() == 2
+        listUseCase.listFor(UUID.randomUUID()).isEmpty()
         getUseCase.get(first.id).get().customerId == customerId
         !getUseCase.get(UUID.randomUUID()).isPresent()
     }

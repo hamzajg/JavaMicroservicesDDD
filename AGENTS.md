@@ -117,6 +117,12 @@ NOT in a `*.App` module — don't re-create them per context.
   `GET /identity/me` (`identity.api.url`, default :8082). Missing/invalid
   → 401, Identity down → 503. Live demos must login first; the other
   APIs remain unauthenticated.
+- **Orders are owned by the caller** (`specs/order-ownership/`): the token
+  email resolves to a customer via `GET /customers/by-email`; `POST /orders`
+  derives `customerId` from that (never the body), `GET /orders` is scoped
+  to the caller, and foreign orders read/cancel as `404`. Ownership is
+  enforced in `OrderController`; `Order.App` adds `findByCustomerId` +
+  `ResolveCustomerUseCase`.
 - `Identity.Api` runs on **8082**; all services can run
   simultaneously (separate terminals — see bootRun landmine).
 - `Product.Api` runs on **8081** (`application.properties`) so both

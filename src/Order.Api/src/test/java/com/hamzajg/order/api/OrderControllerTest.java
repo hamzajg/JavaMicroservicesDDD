@@ -45,16 +45,19 @@ public class OrderControllerTest {
     private TokenIntrospector tokenIntrospector;
 
     private static final String AUTH = "Bearer test-token";
+    private static final String BOB_AUTH = "Bearer bob-token";
+
+    private static final UUID CUSTOMER = UUID.randomUUID();
+    private static final UUID OTHER_CUSTOMER = UUID.randomUUID();
+    private static final UUID PRODUCT_A = UUID.randomUUID();
+    private static final UUID PRODUCT_B = UUID.randomUUID();
 
     @BeforeEach
     void validTokenByDefault() {
         when(tokenIntrospector.introspect(any()))
                 .thenReturn(new Introspection(IntrospectionResult.VALID, "jane@example.com"));
+        when(customerDirectory.findByEmail("jane@example.com")).thenReturn(Optional.of(CUSTOMER));
     }
-
-    private static final UUID CUSTOMER = UUID.randomUUID();
-    private static final UUID PRODUCT_A = UUID.randomUUID();
-    private static final UUID PRODUCT_B = UUID.randomUUID();
 
     private void stubHappyPath() {
         when(customerDirectory.customerExists(CUSTOMER)).thenReturn(true);
@@ -64,22 +67,42 @@ public class OrderControllerTest {
                 new ProductCatalog.ProductSnapshot(PRODUCT_B, "SKU-B", "Beta", new BigDecimal("2.50"))));
     }
 
-    private static String placePayload(UUID customerId, String items) {
-        return "{\"customerId\":\"" + customerId + "\",\"items\":" + items + "}";
+    /** Wires a second authenticated caller (bob) with their own customer record. */
+    private void stubSecondCaller() {
+        when(tokenIntrospector.introspect("bob-token"))
+                .thenReturn(new Introspection(IntrospectionResult.VALID, "bob@example.com"));
+        when(customerDirectory.findByEmail("bob@example.com")).thenReturn(Optional.of(OTHER_CUSTOMER));
+        when(customerDirectory.customerExists(OTHER_CUSTOMER)).thenReturn(true);
+    }
+
+    private static String itemsPayload(String items) {
+        return "{\"items\":" + items + "}";
+    }
+
+    private String placeOne(UUID productId, String auth) throws Exception {
+        MvcResult created = mockMvc.perform(post("/orders")
+                        .header("Authorization", auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(itemsPayload("[{\"productId\":\"" + productId + "\",\"quantity\":1}]")))
+                .andExpect(status().isCreated())
+                .andReturn();
+        return objectMapper.readTree(created.getResponse().getContentAsString()).get("id").asText();
     }
 
     @Test
     void placeOrderReturns201PricedServerSide() throws Exception {
         // covers scenario: Place order via API
+        // covers scenario: Placing an order uses the caller's identity
         stubHappyPath();
         String items = "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":2},"
                 + "{\"productId\":\"" + PRODUCT_B + "\",\"quantity\":4}]";
         MvcResult created = mockMvc.perform(post("/orders")
                         .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(placePayload(CUSTOMER, items)))
+                        .content(itemsPayload(items)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", not(emptyString())))
+                .andExpect(jsonPath("$.customerId", is(CUSTOMER.toString())))
                 .andExpect(jsonPath("$.status", is("PLACED")))
                 .andExpect(jsonPath("$.total", is(30.00)))
                 .andExpect(jsonPath("$.lines[0].sku", is("SKU-A")))
@@ -99,8 +122,7 @@ public class OrderControllerTest {
         mockMvc.perform(post("/orders")
                         .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(placePayload(UUID.randomUUID(),
-                                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
+                        .content(itemsPayload("[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
                 .andExpect(status().isNotFound());
 
         when(customerDirectory.customerExists(CUSTOMER)).thenReturn(true);
@@ -108,16 +130,22 @@ public class OrderControllerTest {
         mockMvc.perform(post("/orders")
                         .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(placePayload(CUSTOMER,
-                                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
+                        .content(itemsPayload("[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(post("/orders")
                         .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(placePayload(CUSTOMER,
-                                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":0}]")))
+                        .content(itemsPayload("[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":0}]")))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void unknownCallerEmailIsRejected() throws Exception {
+        // covers scenario: An unknown caller email resolves to no customer
+        when(customerDirectory.findByEmail("jane@example.com")).thenReturn(Optional.empty());
+        mockMvc.perform(get("/orders").header("Authorization", AUTH))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -128,15 +156,9 @@ public class OrderControllerTest {
         MvcResult first = mockMvc.perform(post("/orders")
                         .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(placePayload(CUSTOMER,
-                                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
+                        .content(itemsPayload("[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
                 .andExpect(status().isCreated()).andReturn();
-        mockMvc.perform(post("/orders")
-                        .header("Authorization", AUTH)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(placePayload(CUSTOMER,
-                                "[{\"productId\":\"" + PRODUCT_B + "\",\"quantity\":2}]")))
-                .andExpect(status().isCreated());
+        placeOne(PRODUCT_B, AUTH);
 
         mockMvc.perform(get("/orders").header("Authorization", AUTH))
                 .andExpect(status().isOk())
@@ -153,6 +175,38 @@ public class OrderControllerTest {
     }
 
     @Test
+    void listingReturnsOnlyCallersOrders() throws Exception {
+        // covers scenario: Listing returns only the caller's orders
+        stubHappyPath();
+        stubSecondCaller();
+        placeOne(PRODUCT_A, AUTH);
+        String bobOrder = placeOne(PRODUCT_A, BOB_AUTH);
+
+        mockMvc.perform(get("/orders").header("Authorization", AUTH))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[*].customerId", everyItem(is(CUSTOMER.toString()))))
+                .andExpect(jsonPath("$[*].id", not(hasItem(bobOrder))));
+    }
+
+    @Test
+    void foreignOrderIsInvisible() throws Exception {
+        // covers scenario: Another customer's order is invisible
+        stubHappyPath();
+        stubSecondCaller();
+        String janeOrder = placeOne(PRODUCT_A, AUTH);
+
+        mockMvc.perform(get("/orders/" + janeOrder).header("Authorization", BOB_AUTH))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/orders/" + janeOrder + "/cancel").header("Authorization", BOB_AUTH))
+                .andExpect(status().isNotFound());
+
+        // the owner's order is untouched
+        mockMvc.perform(get("/orders/" + janeOrder).header("Authorization", AUTH))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status", is("PLACED")));
+    }
+
+    @Test
     void upstreamFailureReturnsClean5xx() throws Exception {
         // covers scenario: Upstream server error returns a clean error
         // covers scenario: Upstream connection failure returns a clean error
@@ -161,8 +215,7 @@ public class OrderControllerTest {
         mockMvc.perform(post("/orders")
                         .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(placePayload(CUSTOMER,
-                                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
+                        .content(itemsPayload("[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
                 .andExpect(status().isBadGateway())
                 .andExpect(content().string(not(containsString("Exception"))));
 
@@ -171,15 +224,13 @@ public class OrderControllerTest {
         mockMvc.perform(post("/orders")
                         .header("Authorization", AUTH)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(placePayload(CUSTOMER,
-                                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
+                        .content(itemsPayload("[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]")))
                 .andExpect(status().isGatewayTimeout());
     }
 
     @Test
     void authEnforcement() throws Exception {
-        String body = placePayload(CUSTOMER,
-                "[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]");
+        String body = itemsPayload("[{\"productId\":\"" + PRODUCT_A + "\",\"quantity\":1}]");
 
         // covers scenario: Missing token is rejected
         mockMvc.perform(post("/orders")
