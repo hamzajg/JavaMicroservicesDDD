@@ -7,17 +7,13 @@ import java.util.UUID;
 
 public class PlaceOrderRequest {
 
-    private final UUID customerId;
     private final List<ItemRequest> items;
 
     @JsonCreator
-    public PlaceOrderRequest(@JsonProperty("customerId") UUID customerId,
-                             @JsonProperty("items") List<ItemRequest> items) {
-        this.customerId = customerId;
+    public PlaceOrderRequest(@JsonProperty("items") List<ItemRequest> items) {
         this.items = items;
     }
 
-    public UUID getCustomerId() { return customerId; }
     public List<ItemRequest> getItems() { return items; }
 
     public static class ItemRequest {

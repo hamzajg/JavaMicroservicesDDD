@@ -32,6 +32,7 @@ the customer and product services — see `customer.api.url` /
 | `POST /customers` | Register a customer. Body: `firstName`, `lastName`, `email`, `address`, `phoneNumber`. `201` + customer; `400` on invalid input. |
 | `GET /customers` | List all registered customers. |
 | `GET /customers/{id}` | Get one customer; `404` if unknown. |
+| `GET /customers/by-email?email=...` | Find a customer by email (case-insensitive); `404` if unknown. |
 
 **Order service** (`:8083`) — `specs/order-rest-api/` — the first
 cross-context feature: it calls Customer (`:8080`) and Product (`:8081`)
@@ -40,10 +41,10 @@ server-side.
 
 | Endpoint | Description |
 |---|---|
-| `POST /orders` | Place an order. Body: `customerId`, `items:[{productId, quantity}]`. `201` + order (lines carry catalog sku/name/unitPrice, `total` computed); `404` unknown customer/product; `400` bad quantities. |
-| `GET /orders` | List all orders. |
-| `GET /orders/{id}` | Get one order; `404` if unknown. |
-| `POST /orders/{id}/cancel` | `PLACED`→`CANCELLED`; `409` if already cancelled; `404` unknown. |
+| `POST /orders` | Place an order. Body: `items:[{productId, quantity}]` — the `customerId` is derived from the token (never client-supplied). `201` + order (lines carry catalog sku/name/unitPrice, `total` computed); `404` unknown product or caller-with-no-customer; `400` bad quantities. |
+| `GET /orders` | List the caller's orders only. |
+| `GET /orders/{id}` | Get one of the caller's orders; `404` if unknown or another customer's. |
+| `POST /orders/{id}/cancel` | `PLACED`→`CANCELLED`; `409` if already cancelled; `404` unknown or another customer's. |
 
 Upstream calls to Customer/Product are bounded by
 `upstream.connect-timeout-ms` (default 2000) and
@@ -56,6 +57,13 @@ requires `Authorization: Bearer <token>` from `POST /identity/login`.
 Order.Api introspects via Identity's `GET /identity/me`
 (`identity.api.url`, default `:8082`) — missing/invalid token → `401`,
 Identity down → `503`. Customer/Product/Identity APIs remain open.
+
+**Ownership** (`specs/order-ownership/`): the token's email resolves to a
+customer (Identity→Customer link by email); an order belongs to that
+customer. `POST /orders` derives `customerId` from the token, `GET /orders`
+is scoped to the caller, and reading/cancelling another customer's order is
+`404` (existence is not disclosed). A caller whose email matches no customer
+is rejected `404`.
 
 **Identity service** (`:8082`) — `specs/identity-rest-api/`
 

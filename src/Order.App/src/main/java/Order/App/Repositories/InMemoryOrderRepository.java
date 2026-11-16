@@ -20,6 +20,15 @@ public class InMemoryOrderRepository implements OrderRepository {
         return Optional.ofNullable(orders.get(id));
     }
 
+    public List<Order> findByCustomerId(UUID customerId) {
+        List<Order> matches = new ArrayList<>();
+        for (Order order : orders.values()) {
+            if (order.getCustomerId() != null && order.getCustomerId().equals(customerId))
+                matches.add(order);
+        }
+        return matches;
+    }
+
     public List<Order> findAll() {
         return new ArrayList<>(orders.values());
     }
