@@ -20,6 +20,15 @@ public class InMemoryCustomerRepository implements CustomerRepository {
         return Optional.ofNullable(customers.get(id));
     }
 
+    public Optional<Customer> findByEmail(String email) {
+        if (email == null)
+            return Optional.empty();
+        return customers.values().stream()
+                .filter(c -> c.getEmail() != null && c.getEmail().getEmail() != null
+                        && email.equalsIgnoreCase(c.getEmail().getEmail()))
+                .findFirst();
+    }
+
     public List<Customer> findAll() {
         return new ArrayList<>(customers.values());
     }

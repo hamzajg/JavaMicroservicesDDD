@@ -1,0 +1,19 @@
+{
+  "feature": "order-ownership",
+  "status": "running",
+  "iterations": 1,
+  "updated": "2026-11-16T10:15:11Z",
+  "waves": {
+    "1": {
+      "status": "in-progress",
+      "branch": "feat/order-ownership-w1",
+      "pr": "\u2014",
+      "evidence": "\u2014",
+      "updated": "2026-11-16T10:15:11Z"
+    }
+  },
+  "gates": {},
+  "events": [
+    "2026-11-16T10:15:11Z start wave 1 on feat/order-ownership-w1"
+  ]
+}

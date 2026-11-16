@@ -21,7 +21,9 @@ public class IdentityTokenIntrospectorTest {
         server.createContext("/identity/me", ex -> {
             String auth = ex.getRequestHeaders().getFirst("Authorization");
             int status = "Bearer good-token".equals(auth) ? 200 : 401;
-            byte[] body = (status == 200 ? "{\"id\":\"u1\"}" : "{}").getBytes();
+            byte[] body = (status == 200
+                    ? "{\"id\":\"u1\",\"email\":\"jane@example.com\"}"
+                    : "{}").getBytes();
             ex.sendResponseHeaders(status, body.length);
             ex.getResponseBody().write(body);
             ex.close();
@@ -41,16 +43,26 @@ public class IdentityTokenIntrospectorTest {
         server.stop(0);
     }
 
+    // covers scenario: The caller identity is read from the token
+    @Test
+    void validTokenCarriesTheCallerEmail() {
+        Introspection introspection = introspector.introspect("good-token");
+        assertEquals(IntrospectionResult.VALID, introspection.getResult());
+        assertEquals("jane@example.com", introspection.getEmail());
+    }
+
     // covers scenario: Valid token reaches order logic
     @Test
     void validTokenIsValid() {
-        assertEquals(IntrospectionResult.VALID, introspector.introspect("good-token"));
+        assertEquals(IntrospectionResult.VALID, introspector.introspect("good-token").getResult());
     }
 
     // covers scenario: Invalid token is rejected
     @Test
     void badTokenIsInvalid() {
-        assertEquals(IntrospectionResult.INVALID, introspector.introspect("forged"));
+        Introspection introspection = introspector.introspect("forged");
+        assertEquals(IntrospectionResult.INVALID, introspection.getResult());
+        assertNull(introspection.getEmail());
     }
 
     // covers scenario: Identity outage fails closed
@@ -58,7 +70,7 @@ public class IdentityTokenIntrospectorTest {
     void unreachableIdentityIsUnavailable() {
         IdentityTokenIntrospector dead = new IdentityTokenIntrospector(
                 timeoutTemplate(), "http://127.0.0.1:1");
-        assertEquals(IntrospectionResult.UNAVAILABLE, dead.introspect("any"));
+        assertEquals(IntrospectionResult.UNAVAILABLE, dead.introspect("any").getResult());
     }
 
     // covers scenario: Introspection call is bounded
@@ -67,9 +79,9 @@ public class IdentityTokenIntrospectorTest {
         IdentityTokenIntrospector stalled = new IdentityTokenIntrospector(
                 timeoutTemplate(), "http://127.0.0.1:" + server.getAddress().getPort() + "/stall");
         long start = System.nanoTime();
-        IntrospectionResult r = stalled.introspect("good-token");
+        Introspection r = stalled.introspect("good-token");
         long elapsedMs = (System.nanoTime() - start) / 1_000_000;
-        assertEquals(IntrospectionResult.UNAVAILABLE, r);
+        assertEquals(IntrospectionResult.UNAVAILABLE, r.getResult());
         assertTrue(elapsedMs < 1500, "introspection should abort near timeout, took " + elapsedMs + "ms");
     }
 

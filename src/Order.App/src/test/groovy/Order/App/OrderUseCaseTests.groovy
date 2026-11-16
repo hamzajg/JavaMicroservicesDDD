@@ -20,6 +20,7 @@ public class OrderUseCaseTests extends Specification {
     CancelOrderUseCase cancelUseCase
     GetOrderUseCase getUseCase
     ListOrdersUseCase listUseCase
+    ResolveCustomerUseCase resolveCustomerUseCase
 
     UUID customerId = UUID.randomUUID()
     UUID productA = UUID.randomUUID()
@@ -30,6 +31,7 @@ public class OrderUseCaseTests extends Specification {
         orderRepository = new InMemoryOrderRepository()
         customerDirectory = Stub(CustomerDirectory) {
             customerExists(_) >> { args -> args[0] == customerId }
+            findByEmail(_) >> { args -> args[0] == "jane@example.com" ? Optional.of(customerId) : Optional.empty() }
         }
         productCatalog = Stub(ProductCatalog) {
             findById(_) >> { args ->
@@ -42,6 +44,7 @@ public class OrderUseCaseTests extends Specification {
         cancelUseCase = new CancelOrderUseCase(pubServices, orderRepository)
         getUseCase = new GetOrderUseCase(orderRepository)
         listUseCase = new ListOrdersUseCase(orderRepository)
+        resolveCustomerUseCase = new ResolveCustomerUseCase(customerDirectory)
     }
 
     def "Should place an order priced from the catalog and publish OrderPlaced"() {

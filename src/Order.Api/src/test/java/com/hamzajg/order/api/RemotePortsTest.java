@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class RemotePortsTest {
 
+    private static final String CUSTOMER_ID = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+
     private HttpServer server;
     private String baseUrl;
     private RemotePorts ports;
@@ -31,6 +33,8 @@ public class RemotePortsTest {
         });
         server.createContext("/fail", ex -> respond(ex, 500, "{}"));
         server.createContext("/missing", ex -> respond(ex, 404, "{}"));
+        server.createContext("/customers/by-email", ex -> respond(ex, 200,
+                "{\"id\":\"" + CUSTOMER_ID + "\",\"email\":\"ada@example.com\"}"));
         server.createContext("/ok", ex -> respond(ex, 200, "{\"id\":\"" + UUID.randomUUID()
                 + "\",\"sku\":\"S1\",\"name\":\"Thing\",\"price\":\"9.99\"}"));
         server.start();
@@ -99,6 +103,21 @@ public class RemotePortsTest {
         assertTrue(ports.customerDirectory().customerExists(UUID.randomUUID()));
         Optional<?> snap = ports.productCatalog().findById(UUID.randomUUID());
         assertTrue(snap.isPresent());
+    }
+
+    // covers scenario: A caller is resolved to their customer by email
+    @Test
+    void findByEmailResolvesTheCustomerId() {
+        RemotePorts lookup = new RemotePorts(timeoutTemplate(), baseUrl, baseUrl + "/ok");
+        assertEquals(Optional.of(UUID.fromString(CUSTOMER_ID)),
+                lookup.customerDirectory().findByEmail("ada@example.com"));
+    }
+
+    // covers scenario: An unknown caller email resolves to no customer
+    @Test
+    void findByEmailUnknownEmailIsEmpty() {
+        RemotePorts missing = new RemotePorts(timeoutTemplate(), baseUrl + "/missing", baseUrl + "/ok");
+        assertEquals(Optional.empty(), missing.customerDirectory().findByEmail("ghost@example.com"));
     }
 
     private static RestTemplate timeoutTemplate() {

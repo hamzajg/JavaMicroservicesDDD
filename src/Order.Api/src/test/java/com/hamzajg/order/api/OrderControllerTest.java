@@ -1,5 +1,6 @@
 package com.hamzajg.order.api;
 
+import com.hamzajg.order.api.auth.Introspection;
 import com.hamzajg.order.api.auth.IntrospectionResult;
 import com.hamzajg.order.api.auth.TokenIntrospector;
 import Order.App.src.main.java.Order.App.Ports.CustomerDirectory;
@@ -47,7 +48,8 @@ public class OrderControllerTest {
 
     @BeforeEach
     void validTokenByDefault() {
-        when(tokenIntrospector.introspect(any())).thenReturn(IntrospectionResult.VALID);
+        when(tokenIntrospector.introspect(any()))
+                .thenReturn(new Introspection(IntrospectionResult.VALID, "jane@example.com"));
     }
 
     private static final UUID CUSTOMER = UUID.randomUUID();
@@ -188,7 +190,7 @@ public class OrderControllerTest {
                 .andExpect(status().isUnauthorized());
 
         // covers scenario: Invalid token is rejected
-        when(tokenIntrospector.introspect("bad-token")).thenReturn(IntrospectionResult.INVALID);
+        when(tokenIntrospector.introspect("bad-token")).thenReturn(Introspection.of(IntrospectionResult.INVALID));
         mockMvc.perform(post("/orders")
                         .header("Authorization", "Bearer bad-token")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -196,7 +198,7 @@ public class OrderControllerTest {
                 .andExpect(status().isUnauthorized());
 
         // covers scenario: Identity outage fails closed
-        when(tokenIntrospector.introspect("any-token")).thenReturn(IntrospectionResult.UNAVAILABLE);
+        when(tokenIntrospector.introspect("any-token")).thenReturn(Introspection.of(IntrospectionResult.UNAVAILABLE));
         mockMvc.perform(post("/orders")
                         .header("Authorization", "Bearer any-token")
                         .contentType(MediaType.APPLICATION_JSON)

@@ -1,5 +1,7 @@
 package com.hamzajg.order.api.auth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 public class IdentityTokenIntrospector implements TokenIntrospector {
 
     private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final String identityBaseUrl;
 
     public IdentityTokenIntrospector(RestTemplate restTemplate,
@@ -21,19 +24,30 @@ public class IdentityTokenIntrospector implements TokenIntrospector {
     }
 
     @Override
-    public IntrospectionResult introspect(String token) {
+    public Introspection introspect(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         try {
-            restTemplate.exchange(identityBaseUrl + "/identity/me",
-                    HttpMethod.GET, new HttpEntity<>(headers), String.class);
-            return IntrospectionResult.VALID;
+            String body = restTemplate.exchange(identityBaseUrl + "/identity/me",
+                    HttpMethod.GET, new HttpEntity<>(headers), String.class).getBody();
+            return new Introspection(IntrospectionResult.VALID, emailOf(body));
         }
         catch (HttpClientErrorException.Unauthorized e) {
-            return IntrospectionResult.INVALID;
+            return Introspection.of(IntrospectionResult.INVALID);
         }
         catch (RuntimeException e) {
-            return IntrospectionResult.UNAVAILABLE;
+            return Introspection.of(IntrospectionResult.UNAVAILABLE);
+        }
+    }
+
+    /** Reads the caller's email out of Identity's UserResponse; null if absent/unreadable. */
+    private String emailOf(String body) {
+        try {
+            JsonNode email = objectMapper.readTree(body).get("email");
+            return email == null ? null : email.asText();
+        }
+        catch (Exception e) {
+            return null;
         }
     }
 }
