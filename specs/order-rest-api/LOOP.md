@@ -2,7 +2,7 @@
 
 Status: done
 Iterations: 3
-Updated: 2026-11-15T20:49:54Z
+Updated: 2026-11-16T14:50:57Z
 
 | Wave | Status | Branch | PR | Evidence | Updated |
 |------|--------|--------|----|----------|---------|
@@ -14,7 +14,7 @@ Updated: 2026-11-15T20:49:54Z
 | Gate | Status | Evidence | Updated |
 |------|--------|----------|---------|
 | G1 | met | specs/order-rest-api/SPEC.md Decisions records synchronous REST + ports/adapters | 2026-11-15T19:30:32Z |
-| G2 | pending | — | — |
+| G2 | met | Live four-service demo executed 2026-11-16 (backend walkthrough): Identity register 201 + login JWT, Customer+Product cr | 2026-11-16T14:50:57Z |
 
 ## Events
 
@@ -24,3 +24,4 @@ Updated: 2026-11-15T20:49:54Z
 - 2026-11-15T19:42:45Z start wave 2 on feat/order-rest-api-w2
 - 2026-11-15T19:46:57Z complete wave 2 (#20): Order.Api MockMvc 3/3 + full build green; CI green; merged
 - 2026-11-15T19:48:55Z feature validated and shipped
+- 2026-11-16T14:50:57Z gate G2 met: Live four-service demo executed 2026-11-16 (backend walkthrough): Identity register 201 + login JWT, Customer+Product cr

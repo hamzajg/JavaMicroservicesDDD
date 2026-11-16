@@ -2,7 +2,7 @@
   "feature": "order-rest-api",
   "status": "done",
   "iterations": 3,
-  "updated": "2026-11-15T20:49:54Z",
+  "updated": "2026-11-16T14:50:57Z",
   "waves": {
     "1": {
       "status": "done",
@@ -26,9 +26,9 @@
       "updated": "2026-11-15T19:30:32Z"
     },
     "G2": {
-      "status": "pending",
-      "evidence": "\u2014",
-      "updated": "\u2014"
+      "status": "met",
+      "evidence": "Live four-service demo executed 2026-11-16 (backend walkthrough): Identity register 201 + login JWT, Customer+Product cr",
+      "updated": "2026-11-16T14:50:57Z"
     }
   },
   "events": [
@@ -37,6 +37,7 @@
     "2026-11-15T19:42:25Z complete wave 1 (#19): Order.App Spock 6/6 + all App module tests green; CI green; merged. Caught+fixed AggregateRoot v0-event bug",
     "2026-11-15T19:42:45Z start wave 2 on feat/order-rest-api-w2",
     "2026-11-15T19:46:57Z complete wave 2 (#20): Order.Api MockMvc 3/3 + full build green; CI green; merged",
-    "2026-11-15T19:48:55Z feature validated and shipped"
+    "2026-11-15T19:48:55Z feature validated and shipped",
+    "2026-11-16T14:50:57Z gate G2 met: Live four-service demo executed 2026-11-16 (backend walkthrough): Identity register 201 + login JWT, Customer+Product cr"
   ]
 }
