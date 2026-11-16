@@ -1,0 +1,30 @@
+{
+  "feature": "customer-rest-api",
+  "status": "done",
+  "iterations": 1,
+  "updated": "2026-11-15T20:49:54Z",
+  "waves": {
+    "1": {
+      "status": "done",
+      "branch": "feat/customer-api-w1",
+      "pr": "#7",
+      "evidence": "Spock 7/7 green; CI green; merged",
+      "updated": "2026-11-15T19:27:13Z"
+    },
+    "2": {
+      "status": "done",
+      "branch": "feat/customer-api-w2",
+      "pr": "#8",
+      "evidence": "MockMvc 3/3 + full build green; CI green; merged; live walkthrough verified",
+      "updated": "2026-11-15T19:27:13Z"
+    }
+  },
+  "gates": {},
+  "events": [
+    "2026-11-15T19:27:12Z start wave 1 on feat/customer-api-w1",
+    "2026-11-15T19:27:13Z complete wave 1 (#7): Spock 7/7 green; CI green; merged",
+    "2026-11-15T19:27:13Z start wave 2 on feat/customer-api-w2",
+    "2026-11-15T19:27:13Z complete wave 2 (#8): MockMvc 3/3 + full build green; CI green; merged; live walkthrough verified",
+    "2026-11-15T19:27:13Z feature validated and shipped"
+  ]
+}

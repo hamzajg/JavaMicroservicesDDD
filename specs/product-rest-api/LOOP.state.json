@@ -1,0 +1,30 @@
+{
+  "feature": "product-rest-api",
+  "status": "done",
+  "iterations": 0,
+  "updated": "2026-11-15T20:49:54Z",
+  "waves": {
+    "1": {
+      "status": "done",
+      "branch": "feat/product-api-w1",
+      "pr": "#11",
+      "evidence": "Spock 6/6 + full build green; CI green; merged",
+      "updated": "2026-11-15T19:27:21Z"
+    },
+    "2": {
+      "status": "done",
+      "branch": "feat/product-api-w2",
+      "pr": "#12",
+      "evidence": "MockMvc 3/3 + build green; CI green; merged; live walkthrough verified",
+      "updated": "2026-11-15T19:27:22Z"
+    }
+  },
+  "gates": {},
+  "events": [
+    "2026-11-15T19:27:21Z start wave 1 on feat/product-api-w1",
+    "2026-11-15T19:27:21Z complete wave 1 (#11): Spock 6/6 + full build green; CI green; merged",
+    "2026-11-15T19:27:21Z start wave 2 on feat/product-api-w2",
+    "2026-11-15T19:27:22Z complete wave 2 (#12): MockMvc 3/3 + build green; CI green; merged; live walkthrough verified",
+    "2026-11-15T19:27:22Z feature validated and shipped"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "feature": "order-resilience",
+  "status": "done",
+  "iterations": 1,
+  "updated": "2026-11-15T20:49:54Z",
+  "waves": {
+    "1": {
+      "status": "done",
+      "branch": "feat/order-resilience-w1",
+      "pr": "#24",
+      "evidence": "Order.Api 10/10 tests, full build green, CI green",
+      "updated": "2026-11-15T20:08:42Z"
+    },
+    "2": {
+      "status": "done",
+      "branch": "feat/order-resilience-w2",
+      "pr": "#25",
+      "evidence": "Order.Api 13/13 tests, full build green, CI green",
+      "updated": "2026-11-15T20:12:19Z"
+    }
+  },
+  "gates": {},
+  "events": [
+    "2026-11-15T20:03:11Z start wave 1 on feat/order-resilience-w1",
+    "2026-11-15T20:08:42Z complete wave 1 (#24): Order.Api 10/10 tests, full build green, CI green",
+    "2026-11-15T20:08:58Z start wave 2 on feat/order-resilience-w2",
+    "2026-11-15T20:12:19Z complete wave 2 (#25): Order.Api 13/13 tests, full build green, CI green",
+    "2026-11-15T20:17:13Z feature validated and shipped"
+  ]
+}
