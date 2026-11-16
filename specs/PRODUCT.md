@@ -5,6 +5,7 @@
 | customer-rest-api (`customer-rest-api/`) | 2 | 5 | 2 | yes | yes |
 | identity-rest-api (`identity-rest-api/`) | 2 | 5 | 2 | yes | yes |
 | order-auth (`order-auth/`) | 1 | 5 | 1 | yes | yes |
+| order-ownership (`order-ownership/`) | 2 | 6 | 2 | yes | yes |
 | order-resilience (`order-resilience/`) | 2 | 5 | 2 | yes | yes |
 | order-rest-api (`order-rest-api/`) | 2 | 5 | 2 | yes | yes |
 | product-rest-api (`product-rest-api/`) | 2 | 5 | 2 | yes | yes |
