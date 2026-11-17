@@ -1,8 +1,8 @@
 # Delivery audit — order-rest-api (spec)
 
-- Repo: `~`
+- Repo: `~/factory/openharness/sources/JavaMicroservicesDDD`
 - Spec: `specs/order-rest-api`
-- Generated: 2026-11-17T20:08:22Z
+- Generated: 2026-11-17T20:34:18Z
 - Phase: **spec**
 - Findings: **0 blockers · 0 concerns · 0 unverified**
 - This is a deterministic evidence brief, not a verdict. The `delivery-auditor` re-verifies it and fills the verdict.

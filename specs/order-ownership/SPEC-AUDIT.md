@@ -1,8 +1,8 @@
 # Delivery audit — order-ownership (spec)
 
-- Repo: `~`
+- Repo: `~/factory/openharness/sources/JavaMicroservicesDDD`
 - Spec: `specs/order-ownership`
-- Generated: 2026-11-17T20:08:21Z
+- Generated: 2026-11-17T20:34:17Z
 - Phase: **spec**
 - Findings: **0 blockers · 0 concerns · 0 unverified**
 - This is a deterministic evidence brief, not a verdict. The `delivery-auditor` re-verifies it and fills the verdict.
@@ -34,19 +34,12 @@ None.
 ## Verdict (agent fills after verifying the code)
 
 ```
-AUDIT: PASS
-PHASE: spec
-BLOCKERS: 0
-CONCERNS: 0
-UNVERIFIED: 0
-EVIDENCE:
-  - SPEC.md defines the ACs, scenarios, waves and backlog items; all
-    traceable with no dangling references.
-  - GATES.md declares gates (where present); all recorded met with
-    non-placeholder evidence in LOOP.md.
-  - WAVES.md plans the waves; LOOP records them done, merged, CI green.
-  - `review_delivery --phase=spec --write --force` → 0 blockers /
-    0 concerns.
+AUDIT: PASS | CONCERNS | BLOCK
+PHASE: spec | delivery
+BLOCKERS: <confirmed count and why>
+CONCERNS: <accepted concerns and why>
+UNVERIFIED: <what could not be checked>
+EVIDENCE: <commands run, files read, tests observed>
 ```
 
 Rules: `BLOCK` on any confirmed blocker, hallucinated claim, or

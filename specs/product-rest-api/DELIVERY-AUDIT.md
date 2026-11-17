@@ -1,8 +1,8 @@
 # Delivery audit — product-rest-api (delivery)
 
-- Repo: `~`
+- Repo: `~/factory/openharness/sources/JavaMicroservicesDDD`
 - Spec: `specs/product-rest-api`
-- Generated: 2026-11-17T20:08:22Z
+- Generated: 2026-11-17T20:34:18Z
 - Phase: **delivery**
 - Findings: **0 blockers · 0 concerns · 1 unverified**
 - This is a deterministic evidence brief, not a verdict. The `delivery-auditor` re-verifies it and fills the verdict.
@@ -34,21 +34,12 @@ None.
 ## Verdict (agent fills after verifying the code)
 
 ```
-AUDIT: PASS
-PHASE: delivery
-BLOCKERS: 0 — no confirmed blockers; deterministic brief found none and
-  the independent re-verification below confirms every AC is traced to a
-  scenario, wave, backlog item and test file.
-CONCERNS: 0
-UNVERIFIED: 1 — scope drift not checked (origin/master); no changed files
-  were staged in this audit run, so the diff-based scope check was a no-op.
-EVIDENCE:
-  - `sh gradlew build --no-daemon` (JDK 17) → BUILD SUCCESSFUL
-  - `ship_loop --action=reconcile` → LOOP matches git + GitHub
-  - VALIDATION.md: all scenarios detected with test evidence (✓, no weak
-    token matches)
-  - `review_delivery --phase=all --write --force` regenerated this brief
-    with 0 blockers / 0 concerns
+AUDIT: PASS | CONCERNS | BLOCK
+PHASE: spec | delivery
+BLOCKERS: <confirmed count and why>
+CONCERNS: <accepted concerns and why>
+UNVERIFIED: <what could not be checked>
+EVIDENCE: <commands run, files read, tests observed>
 ```
 
 Rules: `BLOCK` on any confirmed blocker, hallucinated claim, or
