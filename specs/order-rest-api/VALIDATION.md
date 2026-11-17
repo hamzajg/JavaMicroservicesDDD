@@ -4,11 +4,11 @@
 
 | AC | Criterion | Scenarios | Wave(s) | Test evidence |
 |----|-----------|-----------|---------|---------------|
-| 1 | POST /orders with a known customer + products returns 201 +  | 4 | @w2 | OrderControllerTest.java |
-| 2 | Unknown customer or product → 404; bad quantities → 400; not | 4 | @w2 | OrderControllerTest.java |
-| 3 | GET /orders lists; GET /orders/{id} returns one or 404 | 4 | @w2 | OrderControllerTest.java |
-| 4 | POST /orders/{id}/cancel flips PLACED→CANCELLED; cancelling  | 4 | @w2 | OrderControllerTest.java |
-| 5 | Placing publishes OrderPlaced; cancelling publishes OrderCan | 1 | @w1 | OrderUseCaseTests.groovy |
+| 1 | POST /orders with a known customer + products returns 201 +… | Cancel order, Place order rejected cleanly, Place order via API, Query orders | 2 | OrderControllerTest.java |
+| 2 | Unknown customer or product → 404; bad quantities → 400… | Cancel order, Place order rejected cleanly, Place order via API, Query orders | 2 | OrderControllerTest.java |
+| 3 | GET /orders lists; GET /orders/{id} returns one or 404 | Cancel order, Place order rejected cleanly, Place order via API, Query orders | 2 | OrderControllerTest.java |
+| 4 | POST /orders/{id}/cancel flips PLACED→CANCELLED; cancelling… | Cancel order, Place order rejected cleanly, Place order via API, Query orders | 2 | OrderControllerTest.java |
+| 5 | Placing publishes OrderPlaced; cancelling publishes… | Order events published | 1 | OrderUseCaseTests.groovy |
 
 ## Scenario coverage
 
@@ -30,3 +30,11 @@
 Note: 'no evidence' means neither the scenario name nor a
 token match was found in test files — verify by hand before
 treating it as a real gap. '~' marks weak token-match evidence.
+
+## Outcome follow-up
+
+Optional; this is a post-release learning record, not a finish gate.
+- Status: not yet measured
+- Owner and review date: (record when known)
+- Signal and observed result: (record after release; do not invent)
+- Learning or next action: (record after review)

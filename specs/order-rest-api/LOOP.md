@@ -2,7 +2,7 @@
 
 Status: done
 Iterations: 3
-Updated: 2026-11-17T18:48:04Z
+Updated: 2026-11-17T20:07:05Z
 
 | Wave | Status | Branch | PR | Evidence | Updated |
 |------|--------|--------|----|----------|---------|
@@ -14,7 +14,7 @@ Updated: 2026-11-17T18:48:04Z
 | Gate | Status | Evidence | Updated |
 |------|--------|----------|---------|
 | G1 | met | specs/order-rest-api/SPEC.md Decisions records synchronous REST + ports/adapters | 2026-11-15T19:30:32Z |
-| G2 | met | Live four-service demo executed 2026-11-16 (backend walkthrough): Identity register 201 + login JWT, Customer+Product cr | 2026-11-16T14:50:57Z |
+| G2 | met | 2026-11-17 live four-service demo: Identity register/login/me, Customer+Product create+price, Order place+cancel+404, Id | 2026-11-17T20:07:05Z |
 
 ## Events
 
@@ -33,3 +33,6 @@ Updated: 2026-11-17T18:48:04Z
 - 2026-11-17T18:47:42Z start wave 2 on feat/order-api-w2
 - 2026-11-17T18:47:48Z complete wave 2 (#20): Order.Api MockMvc 3/3 + full build green; CI green; merged
 - 2026-11-17T18:48:04Z feature validated and shipped
+- 2026-11-17T20:05:53Z gate G2 met: Live four-service demo executed 2026-11-17 (backend walkthrough): Identity register 201 + login JWT, Customer+Product cr
+- 2026-11-17T20:06:52Z gate G2 met: 2026-11-17 live four-service demo: Identity register/login/me, Customer+Product create+price, Order place+cancel+404, Id
+- 2026-11-17T20:07:05Z gate G2 met: 2026-11-17 live four-service demo: Identity register/login/me, Customer+Product create+price, Order place+cancel+404, Id
