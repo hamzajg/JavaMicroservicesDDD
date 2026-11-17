@@ -1,6 +1,6 @@
 # Delivery audit — identity-rest-api (delivery)
 
-- Repo: `/home/kali/factory/openharness/sources/JavaMicroservicesDDD`
+- Repo: `~`
 - Spec: `specs/identity-rest-api`
 - Generated: 2026-11-17T20:08:21Z
 - Phase: **delivery**

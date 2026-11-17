@@ -1,6 +1,6 @@
 # Delivery audit — order-ownership (spec)
 
-- Repo: `/home/kali/factory/openharness/sources/JavaMicroservicesDDD`
+- Repo: `~`
 - Spec: `specs/order-ownership`
 - Generated: 2026-11-17T20:08:21Z
 - Phase: **spec**

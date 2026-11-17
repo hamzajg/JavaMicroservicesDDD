@@ -1,6 +1,6 @@
 # Delivery audit — order-rest-api (spec)
 
-- Repo: `/home/kali/factory/openharness/sources/JavaMicroservicesDDD`
+- Repo: `~`
 - Spec: `specs/order-rest-api`
 - Generated: 2026-11-17T20:08:22Z
 - Phase: **spec**

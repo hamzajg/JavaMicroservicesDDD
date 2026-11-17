@@ -1,6 +1,6 @@
 # Delivery audit — order-resilience (delivery)
 
-- Repo: `/home/kali/factory/openharness/sources/JavaMicroservicesDDD`
+- Repo: `~`
 - Spec: `specs/order-resilience`
 - Generated: 2026-11-17T20:08:22Z
 - Phase: **delivery**
