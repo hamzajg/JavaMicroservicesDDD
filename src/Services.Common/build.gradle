@@ -42,5 +42,5 @@ test {
 }
 
 java {
-    sourceCompatibility = '17'
+    sourceCompatibility = '25'
 }

@@ -7,8 +7,8 @@ Guidance for AI agents (and humans) working in this repository.
 A small multi-module Spring Boot project exploring microservices with
 Domain-Driven Design in Java. **Learning/reference project** — currently
 only the Customer slice exists; Product/Identity are absent by design.
-Stack: Java 17, Spring Boot 2.7.18
-(Web + WebFlux deps), Spock 2 + JUnit 5 tests, Gradle 7.6.4 wrapper.
+Stack: Java 25, Spring Boot 3.5.16
+(Web + WebFlux deps), Spock 2 + JUnit 5 tests, Gradle 9.9.1 wrapper.
 
 ## Commands
 
@@ -16,11 +16,11 @@ Verified 2026-11-13 against CI (`.github/workflows/ci.yml`) and README.
 
 | Task | Command |
 |---|---|
-| Build + test | `sh gradlew build --no-daemon` (CI: JDK 17) |
+| Build + test | `sh gradlew build --no-daemon` (CI: JDK 25) |
 | Tests only | `sh gradlew test` |
 | Run API | `sh gradlew :Customer.Api:bootRun` (Spring default :8080) |
 
-Requires: **JDK 17** (CI pins `java-version: "17"`; Gradle 7.6.4
+Requires: **JDK 25** (CI pins `java-version: "25"`; Gradle 9.9.1
 runs on it). Modules map to dirs via `settings.gradle`'s
 `projectDir` trick (names ≠ paths).
 
@@ -105,7 +105,7 @@ NOT in a `*.App` module — don't re-create them per context.
 ## Landmines
 
 - **Default branch is `master`, not `main`.**
-- Spring Boot 2.7 / Java 17 — modernized 2026-11 (was Boot 2.1.9/Java 8,
+- Spring Boot 3.5 / Java 25 — modernized 2026-11 (was Boot 2.1.9/Java 8,
   Gradle 5.6.1/JDK 11); javax namespace retained (Boot 2.x, not 3.x).
 - `Order.Api` runs on **8083** and needs Customer (:8080) + Product
   (:8081) reachable — `customer.api.url`/`product.api.url` properties.
@@ -143,7 +143,7 @@ NOT in a `*.App` module — don't re-create them per context.
 
 - Branch from `master`; name branches `feat/*`, `fix/*`, `chore/*`, `docs/*`.
 - Docs-only changes still go through a PR; never commit to `master` directly.
-- Verify before claiming: `sh gradlew build --no-daemon` on JDK 17 and
+- Verify before claiming: `sh gradlew build --no-daemon` on JDK 25 and
   report the real result.
 - Keep changes minimal and consistent with surrounding code. No drive-by
   refactors.

@@ -47,5 +47,5 @@ endpoint should be a `@RestController` in `Customer.Api` delegating to
 
 ## Toolchain
 
-Gradle 5.6.1 wrapper ⇒ **JDK 8/11 only** (no Java 17). CI: JDK 11,
+Gradle 9.9.1 wrapper ⇒ **JDK 25**. CI: JDK 25,
 `sh gradlew build --no-daemon`.

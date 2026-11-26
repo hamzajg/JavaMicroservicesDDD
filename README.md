@@ -18,10 +18,10 @@ the customer and product services — see `customer.api.url` /
 
 ## Tech stack
 
-- Java 17
-- Spring Boot 2.7.18 (Spring MVC — `spring-boot-starter-web`; WebFlux dep retained but unused)
+- Java 25
+- Spring Boot 3.5.16 (Spring MVC — `spring-boot-starter-web`; WebFlux dep retained but unused)
 - Spock 2 + Groovy 3 (`Customer.App`), JUnit 5 (`Customer.Api`)
-- Gradle 7.6.4 (wrapper included)
+- Gradle 9.9.1 (wrapper included)
 
 ## REST APIs
 
@@ -116,7 +116,7 @@ settings.gradle
 
 ## Building and running
 
-Requires **JDK 17**:
+Requires **JDK 25**:
 
 ```bash
 ./gradlew build                          # compile + test all modules

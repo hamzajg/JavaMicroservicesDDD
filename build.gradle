@@ -4,3 +4,16 @@
  * This is a general purpose Gradle build.
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds
  */
+
+subprojects {
+    plugins.withId('java') {
+        // Gradle 9 no longer injects the JUnit platform launcher, and it treats
+        // test sources without discoverable tests as an error.
+        dependencies {
+            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        }
+    }
+    tasks.withType(Test).configureEach {
+        failOnNoDiscoveredTests = false
+    }
+}
