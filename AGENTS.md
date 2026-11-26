@@ -105,8 +105,8 @@ NOT in a `*.App` module — don't re-create them per context.
 ## Landmines
 
 - **Default branch is `master`, not `main`.**
-- Spring Boot 3.5 / Java 25 — modernized 2026-11 (was Boot 2.1.9/Java 8,
-  Gradle 5.6.1/JDK 11); javax namespace retained (Boot 2.x, not 3.x).
+- Spring Boot 3.5.16 / Java 25 — modernized 2026-11 (was Boot 2.1.9/Java 8,
+  Gradle 5.6.1/JDK 11); the namespace moved to `jakarta.*` with it.
 - `Order.Api` runs on **8083** and needs Customer (:8080) + Product
   (:8081) reachable — `customer.api.url`/`product.api.url` properties.
   Upstream calls are bounded by `upstream.connect-timeout-ms` /

@@ -20,7 +20,7 @@ JavaMicroservicesDDD/   (Gradle multi-project, 3 modules)
     │   ├── UseCases/      IRegisterCustomerUseCase → RegisterCustomerUseCase
     │   │                  (impl: RegisterCustomer command → RegisterCustomerUseCase)
     │   └── Services/      IPublisherServices + InMemoryPublisherServices
-    └── Customer.Api/      Spring Boot 2.1.9 — Application.java only,
+    └── Customer.Api/      Spring Boot 3.5.16 — Application.java only,
                            web+webflux deps, NO controllers yet
 ```
 
